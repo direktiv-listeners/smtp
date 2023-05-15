@@ -1,0 +1,25 @@
+apiVersion: sources.knative.dev/v1
+kind: ContainerSource
+metadata:
+  name: smtp-source-knative
+spec:
+  template:
+    spec:
+      containers:
+        - image: localhost:5000/smtp
+          name: smtp-source-knative
+          imagePullPolicy: Always
+          ports:
+          - containerPort: 2525
+  sink:
+    uri: http://direktiv-eventing.default/direktiv
+---
+apiVersion: v1 
+kind: Service
+metadata:
+  name: smtp-listener-service-knative
+spec:
+  selector:
+    sources.knative.dev/containerSource: smtp-source-knative
+  ports:
+  - port: 2525

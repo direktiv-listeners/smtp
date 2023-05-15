@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: smtp-source-plain
+  labels:
+    app: smtp-source-plain
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: smtp-source-plain
+  template:
+    metadata:
+      annotations:
+        linkerd.io/inject: disabled
+      labels:
+        app: smtp-source-plain
+    spec:
+      containers:
+        - name: mtp-source-plain
+          image: localhost:5000/smtp
+          imagePullPolicy: Always
+          ports:
+          - containerPort: 2525
+          env:
+          - name: DIREKTIV_SMTP_ENDPOINT
+            value: http://direktiv-eventing.default/direktiv
+---
+apiVersion: v1 
+kind: Service
+metadata:
+  name: smtp-listener-service-plain
+spec:
+  selector:
+    app: smtp-source-plain
+  ports:
+  - port: 2526
+    targetPort: 2525
