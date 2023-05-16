@@ -2,6 +2,7 @@ name: release
 on:
   push:
     tags:
+      - '[0-9]+.[0-9]+'
       - v*
 
 jobs:
@@ -28,6 +29,6 @@ jobs:
       - name: Prepare
         run: make cross-prepare
       - name: Push
-        run: make cross-build IMAGE=gerke74/smtp-test:${{github.ref_name}}
+        run: make cross-build IMAGE=direktiv/smtp-listener:${{github.ref_name}}
       - name: Latest
-        run: make cross-build IMAGE=gerke74/smtp-test
+        run: make cross-build IMAGE=direktiv/smtp-listener

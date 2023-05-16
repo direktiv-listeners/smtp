@@ -11,11 +11,9 @@ spec:
           imagePullPolicy: Always
           ports:
           - containerPort: 2525
-          # env:
-          # - name: POD_NAME
-          #   value: "mypod"
-          # - name: POD_NAMESPACE
-          #   value: "event-test"
+          env:
+          - name: DIREKTIV_SMTP_HASH
+            value: "true"
   sink:
     uri: http://direktiv-eventing.default/direktiv
 ---
