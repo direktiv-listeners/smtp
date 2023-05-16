@@ -17,3 +17,7 @@ test:
 .PHONY: push
 push:
 	docker build -t ${IMAGE} . && docker push ${IMAGE}
+
+.PHONY: action
+action:
+	act -s DOCKERHUB_USERNAME -s DOCKERHUB_TOKEN -e push-tag.json
