@@ -5,7 +5,6 @@ import (
 	"crypto/tls"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"math/rand"
 	"net/http"
@@ -28,6 +27,8 @@ type session struct {
 	data       map[string]interface{}
 	log        *zap.SugaredLogger
 	smtpConfig *config
+
+	authDone bool
 }
 
 type Attachment struct {
@@ -45,16 +46,23 @@ func newBackend(log *zap.SugaredLogger, config *config) *backend {
 }
 
 func (bkd *backend) NewSession(c *smtp.Conn) (smtp.Session, error) {
+
+	authDone := true
+	if bkd.smtpConfig.user != "" {
+		authDone = false
+	}
+
 	return &session{
 		log:        bkd.log,
 		smtpConfig: bkd.smtpConfig,
 		data:       make(map[string]interface{}),
+		authDone:   authDone,
 	}, nil
 }
 
 func (s *session) AuthPlain(username, password string) error {
-
 	if s.smtpConfig.user == "" {
+		s.authDone = true
 		return nil
 	}
 
@@ -62,6 +70,7 @@ func (s *session) AuthPlain(username, password string) error {
 		return fmt.Errorf("username or password invalid")
 	}
 
+	s.authDone = true
 	return nil
 }
 
@@ -76,6 +85,10 @@ func (s *session) Rcpt(to string) error {
 }
 
 func (s *session) Data(r io.Reader) error {
+
+	if s.smtpConfig.user != "" && !s.authDone {
+		return fmt.Errorf("not authenticated")
+	}
 
 	mr, err := mail.CreateReader(r)
 
@@ -156,7 +169,7 @@ func handleAttachments(mr *mail.Reader) ([]*Attachment, string, error) {
 
 		switch h := p.Header.(type) {
 		case *mail.InlineHeader:
-			b, _ := ioutil.ReadAll(p.Body)
+			b, _ := io.ReadAll(p.Body)
 			if len(string(b)) > 0 {
 				message = string(b)
 			}
@@ -172,7 +185,7 @@ func handleAttachments(mr *mail.Reader) ([]*Attachment, string, error) {
 				return nil, "", err
 			}
 
-			b, err := ioutil.ReadAll(p.Body)
+			b, err := io.ReadAll(p.Body)
 			if err != nil {
 				return nil, "", err
 			}
@@ -231,17 +244,3 @@ func sendCloudEvent(event cloudevents.Event, endpoint, token string, insecure bo
 	return nil
 
 }
-
-// func (bkd *backend) Login(state *smtp.ConnectionState, username, password string) (smtp.Session, error) {
-// 	return &session{
-// 		data: make(map[string]interface{}),
-// 		// event: basicEvent(),
-// 	}, nil
-// }
-
-// func (bkd *backend) AnonymousLogin(state *smtp.ConnectionState) (smtp.Session, error) {
-// 	return &session{
-// 		data: make(map[string]interface{}),
-// 		// event: basicEvent(),
-// 	}, nil
-// }

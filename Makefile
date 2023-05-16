@@ -10,7 +10,6 @@ cross-prepare:
 cross-build:
 	docker buildx build --platform=linux/arm64,linux/amd64 -f Dockerfile --push -t ${IMAGE} .
 
-
 .PHONY: test
 test:
 	go test -v  cmd/*.go
