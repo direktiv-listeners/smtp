@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"os"
 	"strconv"
 	"time"
@@ -84,6 +85,21 @@ func newServer() (*smtp.Server, error) {
 	s.AuthDisabled = true
 	if smtpConfig.user != "" {
 		s.AuthDisabled = false
+	}
+
+	if _, err := os.Stat("/smtp-certs"); !os.IsNotExist(err) {
+		log.Infof("certifcates found")
+
+		cert, err := tls.LoadX509KeyPair("/smtp-certs/tls.crt", "/smtp-certs/tls.key")
+		if err != nil {
+			return nil, err
+		}
+
+		tlsConfig := &tls.Config{
+			Certificates: []tls.Certificate{cert},
+		}
+
+		s.TLSConfig = tlsConfig
 	}
 
 	s.MaxMessageBytes = 100 * 1024 * 1024

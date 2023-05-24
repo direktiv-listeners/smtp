@@ -34,3 +34,19 @@ ingress-nginx:
 | DIREKTIV_SMTP_DEBUG | Enable debug logging |
 
 
+## TLS
+
+The SMTP listener can be configured with TLS. The server searches a directory called `/smtp-certs` for `tls.cert` and `tls.key`. If they are found, the server starts with TLS enabled. The following file is an example configuration.
+
+[plain-tls-example.yaml](https://github.com/direktiv-listeners/smtp/blob/main/kubernetes/plain-tls-example.yaml)
+
+Create a TLS secret in Kubernetes with `kubectl`. This secret will be attached as volume to the pod. The client needs to support self-signed certificates if this certificate is notsigned by a certifcate authority. 
+
+
+```console
+kubectl create secret tls smtp-secret --key server.key --cert server.crt
+```
+
+## Filter
+
+A `filter` query parameter is supported for filters on the `DIREKTIV_SMTP_ENDPOINT` value, e.g. `http://direktiv-eventing.default/direktiv?filter=myfilter`

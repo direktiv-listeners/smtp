@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -205,6 +206,41 @@ func TestSendServer(t *testing.T) {
 	if a["name"] != "test1" {
 		t.Log("first attachment wrong")
 		t.Fail()
+	}
+
+}
+
+func TestSendServerE2ETLS(t *testing.T) {
+
+	addr := os.Getenv("TEST_SERVER")
+	port := os.Getenv("TEST_PORT")
+
+	if addr == "" || port == "" {
+		t.Skip("skipping knative test")
+	}
+
+	t.Log("running kubernetes tls test")
+
+	ps, err := strconv.Atoi(port)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	tlsConfig := &tls.Config{
+		InsecureSkipVerify: true,
+	}
+
+	client, err := mail.NewClient(addr, mail.WithPort(ps),
+		mail.WithTLSPolicy(mail.TLSOpportunistic), mail.WithTLSConfig(tlsConfig), mail.WithSSL(),
+		mail.WithDebugLog())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer client.Close()
+
+	err = mailSend(client)
+	if err != nil {
+		t.Fatal(err)
 	}
 
 }
