@@ -4,11 +4,11 @@ The SMTP listener accepts email and sends them as cloudevents to Direktiv. The e
 
 ## Plain Mode
 
-[plain.yaml](https://github.com/direktiv-listeners/smtp/blob/main/kubernetes/plain.yaml)
+[plain.yaml](https://github.com/direktiv-listeners/smtp-listener/blob/main/kubernetes/plain.yaml)
 
 ## Knative Mode
 
-[knative.yaml](https://github.com/direktiv-listeners/smtp/blob/main/kubernetes/knative.yaml)
+[knative.yaml](https://github.com/direktiv-listeners/smtp-listener/blob/main/kubernetes/knative.yaml)
 
 ## Exposing TCP Services
 
@@ -28,7 +28,7 @@ ingress-nginx:
 | DIREKTIV_SMTP_PASSWORD   | Password for user authentication        |
 | DIREKTIV_SMTP_ENDPOINT | Only required for the plain installation. The format is `http://direktiv-eventing.default/direktiv` where the last part is the target namespace |
 | DIREKTIV_SMTP_TOKEN | Direktiv API key or access token |
-| DIREKTIV_SMTP_INSEURE_TLS | If Direktiv uses a self-signed certifcate this needs to be set to `true` |
+| DIREKTIV_SMTP_INSECURE_TLS | If Direktiv uses a self-signed certifcate this needs to be set to `true` |
 | DIREKTIV_SMTP_ADDRESS | The listener bind address |
 | DIREKTIV_SMTP_HASH | If set to `true` the listener generates an cloud event ID based on the content of the email to avoid duplicate events. Random ID otherwise |
 | DIREKTIV_SMTP_DEBUG | Enable debug logging |
